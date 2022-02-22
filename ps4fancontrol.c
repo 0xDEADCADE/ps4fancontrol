@@ -11,9 +11,7 @@
 #include <pwd.h>
 #include <unistd.h>
 #include <sys/sysmacros.h>
-#include "forms.h"
 
-FL_OBJECT *cnt, *bReset, *bSave, *bExit;
 uint8_t curTemp = 0x4f;
 uint8_t prevTemp = 0;
 
@@ -229,25 +227,6 @@ int loadConfig()
 	
 	return 0;
 }
-
-void showError(const char *title, const char *str)
-{
-	FL_FORM *f;
-	FL_OBJECT *obj;
-	
-	f = fl_bgn_form(FL_UP_BOX, 300, 130);
-	fl_add_box(FL_NO_BOX, 0, 0, 300, 90, str);
-	obj = fl_add_button(FL_NORMAL_BUTTON, 115, 90, 70, 25, "OK");
-	
-	fl_end_form();
-	
-	fl_show_form(f, FL_PLACE_MOUSE, FL_FULLBORDER, title);
-	
-	while(fl_do_forms() != obj)
-	
-	fl_finish();
-	exit(-1);
-}
 	
 
 int set_temp_threshold(uint8_t temperature)
@@ -407,70 +386,6 @@ int get_temp_threshold()
 	return 0;
 }
 
-void counter_callback(FL_OBJECT *obj, long id)
-{
-	int ret;
-	
-	if(prevTemp == 0 && file_exist(configFile) != -1)
-		prevTemp = curTemp;
-		
-	curTemp = 0x4f;
-	
-	curTemp = (uint8_t)fl_get_counter_value(obj);
-	printf("Threshold temperature set to %d \n", curTemp);
-	
-	ret = set_temp_threshold(curTemp);
-	if(ret)
-		exit(ret);
-	
-	if(prevTemp != curTemp)
-		fl_set_button(bSave, 0);
-	else
-		fl_set_button(bSave, 1);
-		
-}
-
-void save_callback(FL_OBJECT *obj, long id)
-{
-	if(prevTemp == curTemp)
-	{
-		fl_set_button(obj, 1);
-	}
-	else if(prevTemp != 0)
-	{
-		saveConfig(curTemp);
-		prevTemp = curTemp;
-	}
-	
-	if(file_exist(configFile))
-	{
-		saveConfig(curTemp);
-		fl_set_button(obj, 1);
-	}
-	
-	if(prevTemp == 0)
-	{
-		prevTemp = curTemp;
-		
-		if(file_exist(configFile) != -1)
-			fl_set_button(obj, 1);
-	}
-}
-
-void reset_callback(FL_OBJECT *obj, long id)
-{
-	prevTemp = 0;
-	curTemp = 0x4f;
-	fl_set_counter_value(cnt, curTemp);
-	fl_set_button(bSave, 0);
-	
-	set_temp_threshold(curTemp);
-	
-	printf("Threshold temperature back to default\n");
-	
-	unlink(configFile);
-}
-
 /*const char *counterString(FL_OBJECT *obj, double value, int prec) 
 {
     static char buf[32];
@@ -482,7 +397,7 @@ void reset_callback(FL_OBJECT *obj, long id)
 
 int main(int argc, char *argv[])
 {
-	int no_gui = -1;
+	int no_gui = 0;
 	int ret = -1;
 	int gid;
 	int uid;
@@ -492,23 +407,15 @@ int main(int argc, char *argv[])
 	{
 		if(strcmp(argv[i], "--debug") == 0)
 			debug = 0;
-		else if(strcmp(argv[i], "--no-gui") == 0)
-			no_gui = 0;
 	}
-	
-	if(no_gui)
-		fl_initialize(&argc, argv, 0, 0, 0);
-		
+
 	dev = makedev(0x49, 1);
 	mknod("/dev/icc", S_IFCHR | 0666, dev);
 	
 	int fd = open("/dev/icc", 0);
 	if(fd == -1)
 	{
-		if(no_gui)
-			showError("Error", "You need run the program as root!");
-		else
-			printf("Error: you need run the program as root!");
+		printf("Error: you need run the program as root!");
 			
 		return -1;
 	}
@@ -535,43 +442,10 @@ int main(int argc, char *argv[])
 	initSettings();
 	ret = loadConfig();
 	
-	if(no_gui == 0)
-	{
-		if(set_temp_threshold(curTemp))
-			return -1;
-		else
-			return 0;
-	}
+	if(set_temp_threshold(curTemp))
+		return -1;
+	else
+		return 0;
 	
-	//GUI
-	FL_FORM *form;
-
-    form = fl_bgn_form(FL_UP_BOX, 350, 150);
-    
-	cnt = fl_add_counter(FL_NORMAL_COUNTER, 25, 50, 300, 25, "Celsius Temperature");
-	fl_set_counter_bounds(cnt, 45, 85);
-	fl_set_counter_step(cnt, 1, 10);
-	fl_set_counter_precision(cnt, 0);
-	fl_set_object_callback(cnt, counter_callback, ret);
-	fl_set_counter_value(cnt, curTemp);
-	fl_set_object_return(cnt, FL_RETURN_END_CHANGED);
-	
-	bReset = fl_add_button(FL_NORMAL_BUTTON, 17, 115, 102, 25, "Reset");
-	bSave = fl_add_button(FL_BUTTON, 124, 115, 102, 25, "Save");
-	bExit = fl_add_button(FL_NORMAL_BUTTON, 231, 115, 102, 25, "Exit");
-	
-	fl_set_object_callback(bSave, save_callback, ret);
-	if(ret != -1)
-		fl_set_button(bSave, 1);
-		
-	fl_set_object_callback(bReset, reset_callback, 0);
-
-    fl_end_form();
- 
-    fl_show_form(form, FL_PLACE_MOUSE, FL_FULLBORDER, "PS4 Fan Control");
-
-    while(fl_do_forms() != bExit){}
-	
-	fl_finish();
 	return 0;
 }
