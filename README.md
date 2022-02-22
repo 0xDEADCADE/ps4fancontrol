@@ -1,9 +1,8 @@
-# ps4fancontrol
+# ps4fancontrol-nogui
 
-Just a simple program to change the fan speed from linux (PS4)
+Just a simple program to change the fan speed from linux (PS4) (Removed xforms dependency)
 
 ## Build
-Download, build, install the XForms Toolkit: http://xforms-toolkit.org/
 
 Type 
 ```
