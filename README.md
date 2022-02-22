@@ -24,17 +24,17 @@ ps4fancontrol --no-gui
 in a unit configuration file: https://wiki.archlinux.org/index.php/Systemd#Writing_unit_files or use crontab or similar..
 
 ## Arch Linux users
-1) If you are on Arch Linux you can just add the repository https://psxita.it/repo-testing to /etc/pacman.conf
+1) If you are on Arch Linux you can just add the repository https://deadca.de/repo/ps4/os/x86_64 to /etc/pacman.conf
 ```
-sudo echo -e "\n[ps4]\nSigLevel = Never\nServer = https://psxita.it/repo-testing" >> /etc/pacman.conf
+sudo echo -e "\n[ps4]\nSigLevel = Optional DatabaseOptional\nServer = https://deadca.de/repo/\$repo/os/\$arch" >> /etc/pacman.conf
 ```
 2) Update Arch Linux
 ```
 sudo pacman -Syu
 ```
-3) Install ps4fancontrol
+3) Install ps4fancontrol-nogui
 ```
-sudo pacman -S ps4fancontrol
+sudo pacman -S ps4fancontrol-nogui
 ```
 4) Run ps4fancontrol
 ```
