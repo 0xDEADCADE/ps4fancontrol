@@ -24,9 +24,9 @@ ps4fancontrol --no-gui
 in a unit configuration file: https://wiki.archlinux.org/index.php/Systemd#Writing_unit_files or use crontab or similar..
 
 ## Arch Linux users
-1) If you are on Arch Linux you can just add the repository https://deadca.de/repo/ps4/os/x86_64 to /etc/pacman.conf
+1) If you are on Arch Linux you can just add the repository https://repo.deadca.de/ps4/os/x86_64 to /etc/pacman.conf
 ```
-sudo echo -e "\n[ps4]\nSigLevel = Optional DatabaseOptional\nServer = https://deadca.de/repo/\$repo/os/\$arch" >> /etc/pacman.conf
+sudo echo -e "\n[ps4]\nSigLevel = Optional DatabaseOptional\nServer = https://repo.deadca.de/\$repo/os/\$arch" >> /etc/pacman.conf
 ```
 2) Update Arch Linux
 ```
